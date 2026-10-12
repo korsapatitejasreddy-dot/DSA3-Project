@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hospital Scheduling Optimisation Engine</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div>
+    <h1>Hospital Scheduling Optimisation Engine</h1>
+    <p>AI-assisted hospital bed & operating-room resource scheduling</p>
+  </div>
+  <span id="backendStatus" class="status">Checking backend...</span>
+</header>
+
+<nav>
+  <button class="nav-btn active" data-page="dashboard">Dashboard</button>
+  <button class="nav-btn" data-page="patients">Patients</button>
+  <button class="nav-btn" data-page="resources">Resources</button>
+  <button class="nav-btn" data-page="schedule">Schedule</button>
+  <button class="nav-btn" data-page="reports">Reports</button>
+</nav>
+
+<main>
+<section id="dashboard" class="page active">
+  <div class="hero">
+    <div>
+      <h2>Smart Resource Allocation</h2>
+      <p>Priority Queue + Constraint Satisfaction + Greedy Allocation + Local Search</p>
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="generateSchedule()">Generate Optimised Schedule</button>
+      <button class="secondary" onclick="resetData()">Reset Demo Data</button>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card"><span>Patients</span><strong id="patientsCount">0</strong></div>
+    <div class="card"><span>Resources</span><strong id="resourcesCount">0</strong></div>
+    <div class="card"><span>Scheduled</span><strong id="scheduledCount">0</strong></div>
+    <div class="card"><span>Waiting</span><strong id="waitingCount">0</strong></div>
+    <div class="card"><span>Utilisation</span><strong id="utilisation">0%</strong></div>
+    <div class="card"><span>Avg Waiting</span><strong id="avgWaiting">0h</strong></div>
+    <div class="card"><span>Makespan</span><strong id="makespan">0h</strong></div>
+  </div>
+
+  <div class="panel">
+    <h3>System Workflow</h3>
+    <div class="workflow">
+      <div>Patient Data</div><b>→</b>
+      <div>Constraint Manager</div><b>→</b>
+      <div>Optimisation Engine</div><b>→</b>
+      <div>Scheduler</div><b>→</b>
+      <div>Dashboard</div>
+    </div>
+  </div>
+</section>
+
+<section id="patients" class="page">
+  <div class="section-head">
+    <div>
+      <h2>Patient Management</h2>
+      <p>Add patients with priority, treatment duration and doctor requirements.</p>
+    </div>
+  </div>
+
+  <form id="patientForm" class="form-grid">
+    <input name="name" placeholder="Patient name" required>
+    <input name="priority" type="number" min="1" max="5" value="3" placeholder="Priority" required>
+    <input name="duration" type="number" min="1" max="12" value="2" placeholder="Duration (hours)" required>
+    <select name="type">
+      <option>Emergency</option><option>Urgent</option><option selected>Planned</option>
+    </select>
+    <input name="doctor" placeholder="Doctor" value="Dr. Rao" required>
+    <input name="admissionDate" type="date" value="2026-09-24">
+    <input name="deadline" type="date" value="2026-09-26">
+    <button class="primary" type="submit">Add Patient</button>
+  </form>
+
+  <div class="panel table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Name</th><th>Priority</th><th>Duration</th><th>Type</th><th>Doctor</th><th>Deadline</th></tr></thead>
+      <tbody id="patientsTable"></tbody>
+    </table>
+  </div>
+</section>
+
+<section id="resources" class="page">
+  <div class="section-head">
+    <div>
+      <h2>Hospital Resources</h2>
+      <p>Available beds and operating rooms used by the scheduling engine.</p>
+    </div>
+  </div>
+  <div class="panel table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Resource</th><th>Type</th><th>Doctor</th><th>Capacity</th><th>Window</th><th>Status</th></tr></thead>
+      <tbody id="resourcesTable"></tbody>
+    </table>
+  </div>
+</section>
+
+<section id="schedule" class="page">
+  <div class="section-head">
+    <div>
+      <h2>Generated Schedule</h2>
+      <p>Assignments are produced automatically; no algorithm selection is required.</p>
+    </div>
+    <button class="primary" onclick="generateSchedule()">Run Scheduler</button>
+  </div>
+  <div class="panel table-wrap">
+    <table>
+      <thead><tr><th>Patient</th><th>Priority</th><th>Resource</th><th>Type</th><th>Doctor</th><th>Time</th><th>Status</th></tr></thead>
+      <tbody id="scheduleTable"></tbody>
+    </table>
+  </div>
+</section>
+
+<section id="reports" class="page">
+  <div class="section-head">
+    <div>
+      <h2>Performance Report</h2>
+      <p>Metrics required by the project specification.</p>
+    </div>
+    <button class="secondary" onclick="window.print()">Print Report</button>
+  </div>
+  <div class="report-grid">
+    <div class="report-box"><h3>Resource Utilisation</h3><div class="big" id="reportUtil">0%</div><p>Total scheduled resource time / available resource time.</p></div>
+    <div class="report-box"><h3>Average Waiting Time</h3><div class="big" id="reportWait">0h</div><p>Average delay from the scheduling window start.</p></div>
+    <div class="report-box"><h3>Makespan</h3><div class="big" id="reportMake">0h</div><p>Latest scheduled completion time.</p></div>
+    <div class="report-box"><h3>Conflict Avoidance</h3><div class="big">ON</div><p>Each resource receives non-overlapping time slots.</p></div>
+  </div>
+  <div class="panel">
+    <h3>Scheduling Logic</h3>
+    <ol>
+      <li>Patients enter a priority queue.</li>
+      <li>Highest-priority patients are considered first.</li>
+      <li>Available resources are checked against constraints.</li>
+      <li>The earliest valid time slot is selected.</li>
+      <li>Local-search refinement attempts to move assignments earlier.</li>
+      <li>The dashboard reports utilisation, waiting time and makespan.</li>
+    </ol>
+  </div>
+</section>
+</main>
+
+<footer>Hospital Scheduling Optimisation Engine • DSA-3 Project • Team 3</footer>
+<script src="app.js"></script>
+</body>
+</html>
